@@ -5,7 +5,7 @@
 				<ion-buttons slot="start">
 					<ion-back-button></ion-back-button>
 				</ion-buttons>
-				<ion-title>Movie Name (TODO)</ion-title>
+				<ion-title>Movie Name</ion-title>
 			</ion-toolbar>
 		</ion-header>
 		<ion-content :fullscreen="true">
@@ -14,8 +14,6 @@
 					<ion-title size="large">Hi</ion-title>
 				</ion-toolbar>
 			</ion-header>
-
-			<!-- Full movie details such as: Name, image, release date, genre, director, etc. -->
 			<ion-card>
 				<ion-grid>
 					<ion-row>
@@ -37,7 +35,6 @@
 					</ion-row>
 				</ion-grid>
 			</ion-card>
-			<p>{{ movieItem }}</p>
 		</ion-content>
 	</ion-page>
 </template>
@@ -73,11 +70,6 @@ const mockData = {
 };
 
 const movieItem = inject('someMovieData', mockData);
-
-const props = defineProps({
-	movieInfo: Object,
-	someText: String
-});
 </script>
 
 <style lang="scss">
