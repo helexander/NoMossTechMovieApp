@@ -11,14 +11,6 @@
 		>
 			<p v-if="!movieData">Loading...</p>
 			<pre v-else>
-        <div>
-          Genres
-        </div>
-        <!-- <select id="genreFilter">
-          <option v-for="genre in genres" :value="genre"> 
-            {{ genre }}
-          </option>
-        </select> -->
         <ion-grid>
 				<ion-row>
 					<ion-col class="test-card" :key="movie.Id" v-for="movie in movieData.Data.Movies" size-xs="12" size-md="6">
@@ -62,14 +54,10 @@ import {
 	IonImg
 } from '@ionic/vue';
 import { ref, provide } from 'vue';
-// import { useRouter } from 'vue-router';
-import { useMovieList, MovieItem } from '@/composables/useMovieList';
-import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 
 const movieData = ref(null);
 
 const maxDescriptionLength = 140;
-const movieGenres = ref(); // Need to define empty array with type
 
 const fetchData = async () => {
 	movieData.value = null;
@@ -80,30 +68,16 @@ const fetchData = async () => {
 			throw new Error(`HTTP error! Status: ${res.status}`);
 		}
 		movieData.value = await res.json();
-		movieData.value = await CapacitorHttp.get(options);
-		// movieGenres.value = [...new Set(movieData.value.map((movie: { Genres: string }) => movie.Genres))];
 	} catch (error) {
 		console.error(error);
 	}
 };
 
-// const doGet = async () => {
-// 	const options = {
-// 		url: 'https://www.eventcinemas.com.au/Movies/GetNowShowing'
-// 	};
-
-//   const res: HttpResponse = await CapacitorHttp.get(options)
-//   .then(() => console.log(res))
-// };
-
 fetchData();
 
 const passSomeData = () => {
-	provide('someMovieData', 'Hi');
-	// provide('someMovieData', movieData.value);
+	provide('someMovieData', movieData.value);
 };
-
-const filterMoviesByGenre = () => {};
 </script>
 
 <style lang="scss">
