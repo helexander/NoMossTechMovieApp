@@ -1,0 +1,8 @@
+{
+	"name": "Movie App",
+
+	"integrations": {
+		"capacitor": {}
+	},
+	"type": "vue-vite"
+}
