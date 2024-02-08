@@ -11,34 +11,76 @@
 		>
 			<p v-if="!movieData">Loading...</p>
 			<pre v-else>
-        <div>
-          Genres
-        </div>
-        <!-- <select id="genreFilter">
-          <option v-for="genre in genres" :value="genre"> 
-            {{ genre }}
-          </option>
-        </select> -->
-        <ion-grid>
-				<ion-row>
-					<ion-col class="test-card" :key="movie.Id" v-for="movie in movieData.Data.Movies" size-xs="12" size-md="6">
-            <ion-card class="movie-list__card">
-              <ion-img :src="movie?.LargePosterUrl" class="movie-list__card__image" />
-              <ion-card-header>
-                <ion-card-title>{{ movie.Name }}</ion-card-title>
-              <ion-card-subtitle>Director: {{ movie?.Director }}</ion-card-subtitle>
-              </ion-card-header>
-              <ion-card-content>
-                <p>
-                  {{ movie.Synopsis !==  null ? (movie.Synopsis).substring(0, maxDescriptionLength) + '...' : 'Synopsis is not available' }}
-              </p>
-                <ion-button :router-link="`/tab2/movie/${movie.Id}`" router-direction="forward" class="more-info-button" @click="passSomeData">More info</ion-button>
-              </ion-card-content>
-            </ion-card>
-					</ion-col>
-				</ion-row>
-			</ion-grid>
+			<div>
+			Genres
+			</div>
+			<!-- <select id="genreFilter">
+			<option v-for="genre in genres" :value="genre"> 
+				{{ genre }}
+			</option>
+			</select> -->
+			<ion-grid>
+					<ion-row>
+						<ion-col class="test-card" :key="movie.Id" v-for="movie in movieData.Data.Movies" size-xs="12" size-md="6">
+				<ion-card class="movie-list__card">
+				<ion-img :src="movie?.LargePosterUrl" class="movie-list__card__image" />
+				<ion-card-header>
+					<ion-card-title>{{ getMovieTitleAndYear(movie.Name, movie.ReleasedAt) }}</ion-card-title>
+				<ion-card-subtitle>Director: {{ movie?.Director }}</ion-card-subtitle>
+				</ion-card-header>
+				<ion-card-content>
+					<p>
+					{{ movie.Synopsis !==  null ? (movie.Synopsis).substring(0, MAX_DESCRIPTION_LENGTH) + '...' : 'Synopsis is not available' }}
+				</p>
+					<ion-button class="more-info-button" @click="openMovieModal(true, movie)">More info</ion-button>
+				</ion-card-content>
+				</ion-card>
+						</ion-col>
+					</ion-row>
+				</ion-grid>
       </pre>
+
+			<!-- MOVIE MODAL -->
+			<ion-modal :is-open="isOpen">
+				<ion-header>
+					<ion-toolbar class="movie-screen-toolbar">
+						<ion-title>{{ getMovieTitleAndYear(selectedMovie.Name, selectedMovie.ReleasedAt) }}</ion-title>
+						<ion-buttons slot="end">
+							<ion-button @click="openMovieModal(false, {})">Close</ion-button>
+						</ion-buttons>
+					</ion-toolbar>
+				</ion-header>
+				<ion-content class="ion-padding">
+					<ion-card>
+						<ion-grid>
+							<ion-row>
+								<ion-col>
+									<ion-img :src="selectedMovie?.LargePosterUrl" />
+								</ion-col>
+								<ion-col>
+									<ion-card-header>
+										<ion-card-title>{{ selectedMovie.Name }}</ion-card-title>
+										<ion-card-subtitle>Director: {{ selectedMovie?.Director }}</ion-card-subtitle>
+										<ion-card-subtitle
+											>Release Date:
+											{{
+												selectedMovie.ReleasedAt !== null || undefined
+													? new Date(selectedMovie.ReleasedAt).toDateString()
+													: 'Unannounced'
+											}}</ion-card-subtitle
+										>
+									</ion-card-header>
+									<ion-card-content>
+										<p>
+											{{ selectedMovie.Synopsis !== null ? selectedMovie.Synopsis : 'Synopsis is not available' }}
+										</p>
+									</ion-card-content>
+								</ion-col>
+							</ion-row>
+						</ion-grid>
+					</ion-card>
+				</ion-content>
+			</ion-modal>
 		</ion-content>
 	</ion-page>
 </template>
@@ -59,51 +101,26 @@ import {
 	IonCardHeader,
 	IonCardSubtitle,
 	IonCardTitle,
-	IonImg
+	IonImg,
+	IonModal,
+	IonButtons
 } from '@ionic/vue';
-import { ref, provide } from 'vue';
-// import { useRouter } from 'vue-router';
-import { useMovieList, MovieItem } from '@/composables/useMovieList';
-import { CapacitorHttp, HttpResponse } from '@capacitor/core';
+import { ref } from 'vue';
+import { getMovieTitleAndYear } from '@/composables/helperFunc.ts';
+import { fetchData } from '@/composables/api.ts';
+
+const MAX_DESCRIPTION_LENGTH = 140;
 
 const movieData = ref(null);
+const isOpen = ref(false);
+let selectedMovie: any = null;
 
-const maxDescriptionLength = 140;
-const movieGenres = ref(); // Need to define empty array with type
+fetchData(movieData);
 
-const fetchData = async () => {
-	movieData.value = null;
-	try {
-		const res = await fetch('https://www.eventcinemas.com.au/Movies/GetNowShowing');
-		console.log(res);
-		if (!res.ok) {
-			throw new Error(`HTTP error! Status: ${res.status}`);
-		}
-		movieData.value = await res.json();
-		movieData.value = await CapacitorHttp.get(options);
-		// movieGenres.value = [...new Set(movieData.value.map((movie: { Genres: string }) => movie.Genres))];
-	} catch (error) {
-		console.error(error);
-	}
+const openMovieModal = (open: boolean, movie: object | null) => {
+	isOpen.value = open;
+	selectedMovie = movie;
 };
-
-// const doGet = async () => {
-// 	const options = {
-// 		url: 'https://www.eventcinemas.com.au/Movies/GetNowShowing'
-// 	};
-
-//   const res: HttpResponse = await CapacitorHttp.get(options)
-//   .then(() => console.log(res))
-// };
-
-fetchData();
-
-const passSomeData = () => {
-	provide('someMovieData', 'Hi');
-	// provide('someMovieData', movieData.value);
-};
-
-const filterMoviesByGenre = () => {};
 </script>
 
 <style lang="scss">
