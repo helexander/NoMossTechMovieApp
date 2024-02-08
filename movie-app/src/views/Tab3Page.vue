@@ -117,7 +117,8 @@ import {
 	IonItem,
 	IonIcon,
 	IonSegment,
-	IonSegmentButton
+	IonSegmentButton,
+	IonLabel
 } from '@ionic/vue';
 import { home, heart, pin, star, call, globe, basket, barbell, trash, person } from 'ionicons/icons';
 </script>
