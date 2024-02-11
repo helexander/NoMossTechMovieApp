@@ -12,14 +12,13 @@
 			<p v-if="!movieData">Loading...</p>
 			<pre v-else>
 			<ion-item>
-				<ion-select label="Filter by Genre:" placeholder="Genres" v-model="selectedGenre">
+				<ion-select label="Filter by Genre:" placeholder="All Genres" v-model="selectedGenre">
 				<ion-select-option v-for="(genreOption, idx) in genreList" :key="idx" :value="genreOption">{{ genreOption }}</ion-select-option>
 			</ion-select>
 			</ion-item>
-			
 			<ion-grid>
 					<ion-row>
-						<ion-col class="test-card" :key="movie.Id" v-for="movie in movieData.Data.Movies" size-xs="12" size-md="6">
+						<ion-col class="test-card" :key="movie.Id" v-for="movie in filteredMovies" size-xs="12" size-md="6">
 				<ion-card class="movie-list__card">
 				<ion-img :src="movie?.LargePosterUrl" class="movie-list__card__image" />
 				<ion-card-header>
@@ -116,68 +115,32 @@ const movieData = ref(null);
 const isOpen = ref(false);
 let retrievedGenres = [];
 let selectedMovie: any = null;
-let genreList: any[] = [];
+// let genreList: any[] = [];
+const genreList = ref([]);
 const selectedGenre = ref(null);
+const filteredMovies = ref([]);
 
-fetchData(movieData).then(() => {
-	retrievedGenres = JSON.parse(JSON.stringify(movieData.value.Data.Genres));
-	genreList = retrievedGenres.map((genre: { name: any }) => genre.name);
-
-	// console.log(genreList);
+fetchData().then((data) => {
+	movieData.value = data;
+	retrievedGenres = JSON.parse(JSON.stringify(data.Data.Genres));
+	genreList.value = retrievedGenres.map((genre: { name: any }) => genre.name);
+	filteredMovies.value = data.Data.Movies;
 });
-
-console.log(selectedGenre);
 
 const openMovieModal = (open: boolean, movie: object | null) => {
 	isOpen.value = open;
 	selectedMovie = movie;
 };
 
-// TODO for Genres:
-// [V] Get all unique Genres through something like Set (which retrieves only unique values)
-//   - Already available on payload
-// [V] Populate select component
-// [ ] Get selected option
-// [ ] Filter out movies through .filter method
-//     - movieData.filter((movie) => movie.Genres.includes(selectedGenre))
-
-const mockGenreSelection = 'adventure';
-
-const mockMovies = [
-	{
-		name: 'Jack',
-		genres: 'action,adventure'
-	},
-	{
-		name: 'Jill',
-		genres: 'comedy,adventure'
-	},
-	{
-		name: 'Ben',
-		genres: 'adventure'
-	},
-	{
-		name: 'Danny',
-		genres: 'action,comedy'
-	},
-	{
-		name: 'Samuel',
-		genres: 'drama'
+const filterMovies = () => {
+	if (movieData.value && selectedGenre.value !== null) {
+		filteredMovies.value = movieData.value.Data.Movies.filter((movie) => movie.Genres.includes(selectedGenre.value.toLowerCase()));
+	} else {
+		filteredMovies.value = movieData.value.Data.Movies;
 	}
-];
+};
 
-console.log(mockMovies.filter((movie) => movie.genres.includes(mockGenreSelection)));
-
-// Pseudo attempt at filtering genre
-
-// let filteredList: { name: string; genres: string }[] = [];
-// const filterMovies = () => {
-// 	//     - movieData.filter((movie) => movie.Genres.includes(selectedGenre))
-// 	filteredList = mockMovie.filter((movie) => movie.genres.includes(mockGenreSelection));
-// 	fetchData(movieData);
-// };
-
-// watch(selectedGenre, filterMovies);
+watch(selectedGenre, filterMovies);
 </script>
 
 <style lang="scss">
